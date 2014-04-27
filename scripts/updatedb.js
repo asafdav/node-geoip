@@ -54,7 +54,7 @@ var databases = [{
 function mkdir(name) {
 	var dir = path.dirname(name);
 	if (!fs.existsSync(dir)) {
-		fs.mkdirSync(dir, 0777);
+		fs.mkdirSync(dir, 777);
 	}
 }
 
