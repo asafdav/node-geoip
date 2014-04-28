@@ -52,18 +52,18 @@ var databases = [{
 	dest: 'geoip-city6.dat'
 }];
 
-function mkdir(name) {
-	var dir = path.dirname(name);
+function mkdir(name, isFile) {
+  if (isFile === undefined) isFile = true;
+	var dir = isFile ? path.dirname(name) : name;
 	if (!fs.existsSync(dir)) {
 		fs.mkdirSync(dir, 511);
     fs.chmodSync(dir, 511);
 	}
 }
 
-fs.chmodSync(modulePath, 511);
-fs.mkdirSync(dataPath, 511);
+mkdir(dataPath, false);
 fs.chmodSync(dataPath, 511);
-fs.mkdirSync(tmpPath, 511);
+mkdir(tmpPath, false);
 fs.chmodSync(tmpPath, 511);
 
 // Ref: http://stackoverflow.com/questions/8493195/how-can-i-parse-a-csv-string-with-javascript
@@ -150,13 +150,12 @@ function extract(tmpFile, tmpFileName, cb) {
 	} else {
 		process.stdout.write('Extracting ' + tmpFileName + ' ...');
 
-		var unzipStream = unzip.Extract({
-			path: path.dirname(tmpFile)
-		});
+    var dir = path.dirname(tmpFile);
+		var pipeSteam = fs.createReadStream(tmpFile).pipe(unzip.Extract({
+      path: dir
+    }));
 
-		var pipeSteam = fs.createReadStream(tmpFile).pipe(unzipStream);
-
-		pipeSteam.on('end', function() {
+		pipeSteam.on('close', function() {
 			console.log(' DONE'.green);
 
 			if (tmpFileName.indexOf('GeoLiteCity') !== -1) {
@@ -168,6 +167,7 @@ function extract(tmpFile, tmpFileName, cb) {
 					}
 				}
 
+        fs.chmodSync(oldPath, 511);
 				var newPath = path.join(tmpPath, 'GeoLiteCity');
 				fs.renameSync(oldPath, newPath);
 			}
