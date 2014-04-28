@@ -20,6 +20,7 @@ var rimraf = require('rimraf').sync;
 var unzip = require('unzip');
 var utils = require('../lib/utils');
 
+var modulePath = path.join(__dirname, '..');
 var dataPath = path.join(__dirname, '..', 'data');
 var tmpPath = path.join(__dirname, '..', 'tmp');
 
@@ -55,8 +56,15 @@ function mkdir(name) {
 	var dir = path.dirname(name);
 	if (!fs.existsSync(dir)) {
 		fs.mkdirSync(dir, 511);
+    fs.chmodSync(dir, 511);
 	}
 }
+
+fs.chmodSync(modulePath, 511);
+fs.mkdirSync(dataPath, 511);
+fs.chmodSync(dataPath, 511);
+fs.mkdirSync(tmpPath, 511);
+fs.chmodSync(tmpPath, 511);
 
 // Ref: http://stackoverflow.com/questions/8493195/how-can-i-parse-a-csv-string-with-javascript
 // Return array of string values, or NULL if CSV string not well formed.
@@ -422,3 +430,4 @@ async.forEachSeries(databases, function(database, nextDatabase) {
 		else rimraf(tmpPath);
 	}
 });
+
